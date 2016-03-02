@@ -4,30 +4,31 @@ author: "WRITE YOUR NAME HERE"
 output: html_document
 ---
 
-```{r, echo=FALSE, message=FALSE, cache=TRUE}
-# DO NOT EDIT THIS SECTION
 
+
+```{r, echo=FALSE, message=FALSE}
+# DO NOT EDIT THIS SECTION
 # Load packages
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(lubridate))
-
+```
+```{r, echo=FALSE, message=FALSE, cache=TRUE}
 # Load data sets. Note this assumes this .Rmd files is in the same directory as
 # the .csv files.
 flights <- read.csv("data/flights.csv", stringsAsFactors = FALSE) %>% 
-  tbl_df() %>%
-  mutate(date=as.Date(date))
+ tbl_df() %>%
+ mutate(date=as.Date(date))
 weather <- read.csv("data/weather.csv", stringsAsFactors = FALSE) %>% 
-  tbl_df() %>%
-  mutate(date=as.Date(date))
+ tbl_df() %>%
+ mutate(date=as.Date(date))
 planes <- read.csv("data/planes.csv", stringsAsFactors = FALSE) %>% 
-  tbl_df()
+ tbl_df()
 airports <- read.csv("data/airports.csv", stringsAsFactors = FALSE) %>% 
-  tbl_df()
+ tbl_df()
 states <- read.csv("data/states.csv", stringsAsFactors = FALSE) %>% 
-  tbl_df()
+ tbl_df()
 ```
-
 
 
 
@@ -54,6 +55,26 @@ Please indicate
 
 ```{r, echo=FALSE, message=FALSE, fig.width=12, fig.height=6}
 
+number_delayed <- filter(flights, dep_delay >30) %>% 
+  select(date, dep_delay) %>% 
+  group_by(date) %>% 
+  tally() %>% 
+  rename(n_delayed = n)
+
+
+total_flights_day <- group_by(flights, date) %>% 
+  tally() %>% 
+  rename(total_flights = n)
+
+set1 <- full_join(total_flights_day, number_delayed, by = "date") 
+
+set1<- mutate(set1, prop = (n_delayed)/(total_flights))
+
+
+ggplot(data = set1, aes(x = date, y = prop)) + geom_bar(stat = "identity") + ylab("proportion of flights delayed more than 30min") + ggtitle("Proportion of Delayed Flights Per Day")
+  
+
+ggplot(data = set1, aes(x = date, y = prop)) + geom_smooth() + ylab("proportion of flights delayed > 30min") + ggtitle("Season Trends in Flight Delays")
 ```
 
 
@@ -67,8 +88,28 @@ they tend to have more room.  Which airlines should these people favor?
 
 ```{r, echo=FALSE, fig.width=12, fig.height=6}
 
-```
+planes_2 <- planes %>%  select(plane, year) %>% filter(year <= 1980)
 
+total_flights_carrier <- group_by(flights, carrier) %>% 
+  tally() %>% 
+  rename(total_flights_carrier = n)
+
+question2 <- flights %>% select(date, carrier, plane)
+
+set2 <- inner_join(question2, planes_2, by = "plane") %>% 
+  group_by(carrier) %>%
+  tally() %>% 
+  rename(num_pre1980 = n)
+
+final2 <- full_join(total_flights_carrier, set2, by = "carrier") %>% 
+  mutate(prop = num_pre1980/total_flights_carrier)
+
+
+ggplot(data = final2, aes(x = carrier, y = prop)) + geom_bar(stat = "identity")
+
+
+
+```
 
 
 
@@ -82,8 +123,34 @@ they tend to have more room.  Which airlines should these people favor?
 
 
 ```{r, echo=FALSE, message=FALSE, fig.width=12, fig.height=6}
+question3 <- select(flights, date, time, carrier, dest) %>% 
+  filter(carrier == "WN")
+
+question3 <- left_join(question3, airports, by = c("dest" = "iata"))
+
+all_flights_states <- question3 %>% 
+  group_by(state) %>%
+  filter(!is.na(state)) %>% 
+  tally() %>% 
+  rename(all_flights_by_state = n)
+
+
+ggplot(all_flights_states, aes(x = state, y = all_flights_by_state)) + geom_bar(stat = "identity") + ylab("Number of Flights")
+#add title
+
+unique_flights <- question3 %>%
+  filter(!is.na(state)) %>% 
+  distinct(dest) %>% 
+  group_by(state) %>% 
+  tally() %>% 
+  rename(unique_dest = n)
+
+ggplot(unique_flights, aes(x = state, y = unique_dest)) + geom_bar(stat = "identity")
+#retitle axis 
 
 ```
+
+
 
 
 
