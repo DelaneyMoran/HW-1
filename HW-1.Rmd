@@ -1,6 +1,6 @@
 ---
 title: "MATH 216 Homework 1"
-author: "WRITE YOUR NAME HERE"
+author: "Delaney Moran""
 output: html_document
 ---
 
@@ -37,9 +37,9 @@ states <- read.csv("data/states.csv", stringsAsFactors = FALSE) %>%
 
 Please indicate
 
-* Who you collaborated with:
-* Roughly how much time you spent on this HW:
-* What gave you the most trouble:
+* Who you collaborated with: Christian, Mohammed
+* Roughly how much time you spent on this HW: 7h
+* What gave you the most trouble: error messages/syntax
 * Any comments you have:
 
 
