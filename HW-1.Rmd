@@ -1,6 +1,6 @@
 ---
 title: "MATH 216 Homework 1"
-author: "Delaney Moran""
+author: "Delaney Moran"
 output: html_document
 ---
 
